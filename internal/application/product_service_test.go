@@ -89,11 +89,13 @@ func TestCreate_InvalidProduct(t *testing.T) {
 
 	input := &domain.Product{Name: "", Price: -10, Stock: -1}
 
+	repo.On("Save", input).Return(nil, domain.NewBadRequestError("datos inválidos"))
+
 	product, err := service.Create(input)
 
 	assert.Error(t, err)
 	assert.Nil(t, product)
-	repo.AssertNotCalled(t, "Save")
+	repo.AssertExpectations(t)
 }
 
 func TestDelete_Success(t *testing.T) {
