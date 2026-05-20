@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"proyectoGo/internal/adapters/http/middleware"
 	"proyectoGo/internal/domain"
 	"proyectoGo/internal/ports/input"
 	"strconv"
@@ -44,7 +45,7 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 func (h *ProductHandler) Create(c *gin.Context) {
 	var product domain.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.Error(domain.NewBadRequestError("json inválido"))
+		c.Error(domain.NewBadRequestError(middleware.TranslateValidationErrors(err)))
 		return
 	}
 
@@ -65,7 +66,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 
 	var product domain.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.Error(domain.NewBadRequestError("json inválido"))
+		c.Error(domain.NewBadRequestError(middleware.TranslateValidationErrors(err)))
 		return
 	}
 

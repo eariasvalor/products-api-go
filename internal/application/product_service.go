@@ -29,16 +29,10 @@ func (s *ProductService) GetByID(id int) (*domain.Product, error) {
 }
 
 func (s *ProductService) Create(product *domain.Product) (*domain.Product, error) {
-	if err := product.Validate(); err != nil {
-		return nil, domain.NewBadRequestError(err.Error())
-	}
 	return s.repo.Save(product)
 }
 
 func (s *ProductService) Update(id int, product *domain.Product) (*domain.Product, error) {
-	if err := product.Validate(); err != nil {
-		return nil, domain.NewBadRequestError(err.Error())
-	}
 	result, err := s.repo.Update(id, product)
 	if err != nil {
 		return nil, domain.NewNotFoundError("producto no encontrado")
