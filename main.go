@@ -6,6 +6,7 @@ import (
 	httpAdapter "proyectoGo/internal/adapters/http"
 	"proyectoGo/internal/adapters/postgres"
 	"proyectoGo/internal/application"
+	"time"
 )
 
 func main() {
@@ -20,6 +21,10 @@ func main() {
 	productRepository := postgres.NewProductRepository(db)
 	productService := application.NewProductService(productRepository)
 	productHandler := httpAdapter.NewProductHandler(productService)
+
+	stockMonitor := application.NewStockMonitor(productRepository, 5)
+	stopMonitor := stockMonitor.Start(1 * time.Minute)
+	defer stopMonitor()
 
 	router := httpAdapter.NewRouter(productHandler)
 
