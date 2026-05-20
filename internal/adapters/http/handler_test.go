@@ -3,9 +3,9 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
+	"proyectoGo/internal/adapters/http/middleware"
 	"proyectoGo/internal/domain"
 	"proyectoGo/internal/mocks"
 	"testing"
@@ -16,7 +16,8 @@ import (
 
 func setupRouter(handler *ProductHandler) *gin.Engine {
 	gin.SetMode(gin.TestMode)
-	router := gin.Default()
+	router := gin.New()
+	router.Use(middleware.ErrorHandler())
 	products := router.Group("/products")
 	{
 		products.GET("", handler.GetAll)
@@ -51,7 +52,7 @@ func TestHandler_GetAll_Error(t *testing.T) {
 	handler := NewProductHandler(service)
 	router := setupRouter(handler)
 
-	service.On("GetAll").Return(nil, errors.New("error interno"))
+	service.On("GetAll").Return(nil, domain.NewInternalError("error interno"))
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/products", nil)
@@ -82,7 +83,7 @@ func TestHandler_GetByID_NotFound(t *testing.T) {
 	handler := NewProductHandler(service)
 	router := setupRouter(handler)
 
-	service.On("GetByID", 99).Return(nil, errors.New("producto no encontrado"))
+	service.On("GetByID", 99).Return(nil, domain.NewNotFoundError("producto no encontrado"))
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/products/99", nil)
@@ -131,7 +132,7 @@ func TestHandler_Delete_NotFound(t *testing.T) {
 	handler := NewProductHandler(service)
 	router := setupRouter(handler)
 
-	service.On("Delete", 99).Return(errors.New("producto no encontrado"))
+	service.On("Delete", 99).Return(domain.NewNotFoundError("producto no encontrado"))
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("DELETE", "/products/99", nil)

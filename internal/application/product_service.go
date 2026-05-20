@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"proyectoGo/internal/domain"
 	"proyectoGo/internal/ports/input"
 	"proyectoGo/internal/ports/output"
@@ -24,25 +23,32 @@ func (s *ProductService) GetAll() ([]*domain.Product, error) {
 func (s *ProductService) GetByID(id int) (*domain.Product, error) {
 	product, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, errors.New("producto no encontrado")
+		return nil, domain.NewNotFoundError("Producto no encontrado")
 	}
 	return product, nil
 }
 
 func (s *ProductService) Create(product *domain.Product) (*domain.Product, error) {
 	if err := product.Validate(); err != nil {
-		return nil, err
+		return nil, domain.NewBadRequestError(err.Error())
 	}
 	return s.repo.Save(product)
 }
 
 func (s *ProductService) Update(id int, product *domain.Product) (*domain.Product, error) {
 	if err := product.Validate(); err != nil {
-		return nil, err
+		return nil, domain.NewBadRequestError(err.Error())
 	}
-	return s.repo.Update(id, product)
+	result, err := s.repo.Update(id, product)
+	if err != nil {
+		return nil, domain.NewNotFoundError("producto no encontrado")
+	}
+	return result, nil
 }
 
 func (s *ProductService) Delete(id int) error {
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return domain.NewNotFoundError("producto no encontrado")
+	}
+	return nil
 }
