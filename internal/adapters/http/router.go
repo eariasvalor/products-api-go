@@ -1,9 +1,14 @@
 package http
 
-import "github.com/gin-gonic/gin"
+import (
+	"proyectoGo/internal/adapters/http/middleware"
+
+	"github.com/gin-gonic/gin"
+)
 
 func NewRouter(handler *ProductHandler) *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.ErrorHandler())
 
 	products := router.Group("/products")
 	{
